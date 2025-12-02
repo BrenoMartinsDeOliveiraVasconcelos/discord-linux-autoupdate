@@ -42,8 +42,6 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
         raise NotImplementedError("Discord API only supports 'deb' packages on Linux at the moment.")
 
     url_req = URL + pkg
-    response = requests.get(url_req)
-    response.raise_for_status()
 
     content = b""
     headers = {}
@@ -52,6 +50,7 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
 
     # Check request integrity
     while True:
+        print("Fetching file...", flush=True)
         response = requests.get(url_req)
         response.raise_for_status()
         content = response.content
@@ -119,26 +118,32 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
     return False
 
 
-def install_file(file_path: str) -> None:
+def install_file(file_path: str, elevate_cmd: str = 'auto') -> None:
     """
     Installs the downloaded file using the appropriate package manager.
 
     Args:
         file_path (str): Path to the downloaded file.
+        elevate_cmd (str): Command to use for privilege elevation. Options are 'auto', 'sudo', or 'pkexec'. Defaults to 'auto'.
 
     Returns:
         bool: True if installation was successful, False otherwise.
 
     """
+    valid_elevate_cmds = ['auto', 'sudo', 'pkexec']
+    if elevate_cmd not in valid_elevate_cmds:
+        raise ValueError(f"Invalid elevate_cmd. Must be one of {valid_elevate_cmds}.")
 
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"The file {file_path} does not exist.")
 
     pkg_type = file_path.split('.')[-1]
-    elevate_command = 'sudo'
-
-    if shutil.which('pkexec') is not None:
-        elevate_command = 'pkexec'
+    
+    if elevate_cmd == 'auto':
+        if shutil.which('pkexec') is not None:
+            elevate_command = 'pkexec'
+        else:
+            elevate_command = 'sudo'
 
     if pkg_type == 'deb':
         apt_fix = False
