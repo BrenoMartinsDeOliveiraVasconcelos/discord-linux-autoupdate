@@ -34,8 +34,10 @@ echo "Copying files..."
 cp -r ./* $install_dir
 
 echo "Creating necessary files..."
-touch "$install_dir/last_saved.json"
-echo "{}" | tee "$install_dir/last_saved.json" > /dev/null
+if [ ! -f "$install_dir/last_saved.json" ]; then
+    touch "$install_dir/last_saved.json"
+    echo "{}" | tee "$install_dir/last_saved.json" > /dev/null
+fi
 
 echo "Creating launchers..."
 cp -r cli_run.sh /usr/local/bin/discord-updater
