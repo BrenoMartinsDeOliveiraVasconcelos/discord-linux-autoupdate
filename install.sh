@@ -62,3 +62,13 @@ chmod -R a+rX "$install_dir"
 chmod a+rX "$install_dir/run_discord.sh"
 chmod a+rw "$install_dir/config.json"
 chmod a+rw "$install_dir/last_saved.json"
+
+read -p "Installation is complete. Do you want to create a .desktop shortcut (for GUI)? (y/n): " create_shortcut
+if [[ "$create_shortcut" == "y" || "$create_shortcut" == "Y" ]]; then
+    desktop_file_path="/usr/share/applications/dau.desktop"
+    echo "Creating .desktop shortcut at $desktop_file_path"
+
+    cp dau.desktop -r $desktop_file_path
+    chown root:root $desktop_file_path
+    chmod a+rX $desktop_file_path
+fi
