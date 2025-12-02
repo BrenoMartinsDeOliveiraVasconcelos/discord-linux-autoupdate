@@ -5,6 +5,7 @@ import random
 import hashlib
 import datetime
 import subprocess
+import shutil
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -134,22 +135,26 @@ def install_file(file_path: str) -> None:
         raise FileNotFoundError(f"The file {file_path} does not exist.")
 
     pkg_type = file_path.split('.')[-1]
+    elevate_command = 'sudo'
+
+    if shutil.which('pkexec') is not None:
+        elevate_command = 'pkexec'
 
     if pkg_type == 'deb':
         apt_fix = False
         try:
-            subprocess.check_call(['sudo', 'dpkg', '-i', file_path])
+            subprocess.check_call([f'{elevate_command}', 'dpkg', '-i', file_path])
             print(f"Successfully installed {file_path} using dpkg.")
             return True   
         except subprocess.CalledProcessError:
             apt_fix = True
         except FileNotFoundError:
-            print("Error: Could not find 'sudo' or 'dpkg'. Are you on a Debian-based system?")
+            print("Error: Could not find 'sudo', 'pkexec' or 'dpkg'. Are you on a Debian-based system?")
             return False
         
         if apt_fix:
             try:
-                subprocess.check_call(['sudo', 'apt-get', '-f', 'install'])
+                subprocess.check_call([f'{elevate_command}', 'apt-get', '-f', 'install'])
                 print(f"Successfully fixed dependencies for {file_path} using apt-get.")
                 return True
             except subprocess.CalledProcessError:
@@ -159,8 +164,26 @@ def install_file(file_path: str) -> None:
         return False
 
 
+def clear_downloads() -> None:
+    """
+    Clears all downloaded files in the download directory.
+    """
+
+    last_saved_json = json.load(open(LAST_SAVED_FILE, 'r'))
+
+    for file in os.listdir(DOWNLOAD_PATH):
+        file_path = os.path.join(DOWNLOAD_PATH, file)
+        try:
+            if os.path.isfile(file_path) and file != last_saved_json["filename"]:
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")
+
 
 if __name__ == '__main__':
     file = fetch_file()
     if file:
         install_file(file)
+
+    clear_downloads()
