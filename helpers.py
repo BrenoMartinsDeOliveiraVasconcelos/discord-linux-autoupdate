@@ -10,11 +10,35 @@ import time
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(SCRIPT_DIR, 'config.json')
+DEFAULT_CONFIG_PATH = os.path.join(SCRIPT_DIR, 'config.json')
+CONFIG_DIR = "/opt/discord-updater"
+CONFIG_PATH = f"{CONFIG_DIR}/config.json"
+
+# Load user config if it exists, otherwise create it with default values
 CONFIG = json.load(open(CONFIG_PATH, 'r'))
+if CONFIG != {}:
+    with open(CONFIG_PATH, 'r') as f:
+        CONFIG = json.load(f)
+else:
+    with open(DEFAULT_CONFIG_PATH, 'r') as f:
+        CONFIG = json.load(f)
+    with open(CONFIG_PATH, 'w+') as f:
+        json.dump(CONFIG, f, indent=4)
+
+# Add missing keys from default config
+with open(DEFAULT_CONFIG_PATH, 'r') as f:
+    default_config = json.load(f)
+
+for key, value in default_config.items():
+    if key not in CONFIG:
+        CONFIG[key] = value
+
+json.dump(CONFIG, open(CONFIG_PATH, 'w+'), indent=4)
 
 # Config variables
 URL = CONFIG['url']
+CHANNEL = CONFIG["channel"]
+URL = URL.replace("$", CHANNEL)
 DOWNLOAD_PATH = CONFIG['download_path']
 LAST_SAVED_FILE = os.path.join(SCRIPT_DIR, 'last_saved.json')
 RETRY_ATTEMPTS = CONFIG.get('retry_attempts', 3)
@@ -199,8 +223,4 @@ def clear_downloads() -> None:
 
 
 if __name__ == '__main__':
-    file = fetch_file()
-    if file:
-        install_file(file)
-
-    clear_downloads()
+    print(CHANNEL, URL)

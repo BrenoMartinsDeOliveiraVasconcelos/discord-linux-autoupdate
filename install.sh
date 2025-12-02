@@ -9,6 +9,7 @@ fi
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_path"
 install_dir="/usr/local/share/discord-updater"
+config_dir="/opt/discord-updater"
 
 if command -v apt-get &> /dev/null; then
     echo "Dependency installation for Debian-based distributions has started."
@@ -29,6 +30,7 @@ fi
 
 echo "Creating necessary directories..."
 mkdir -p $install_dir
+mkdir -p $config_dir
 
 echo "Copying files..."
 cp -r ./* $install_dir
@@ -37,6 +39,11 @@ echo "Creating necessary files..."
 if [ ! -f "$install_dir/last_saved.json" ]; then
     touch "$install_dir/last_saved.json"
     echo "{}" | tee "$install_dir/last_saved.json" > /dev/null
+fi
+
+if [ ! -f "$config_dir/config.json" ]; then
+    touch "$config_dir/config.json"
+    echo "{}" | tee "$config_dir/config.json" > /dev/null
 fi
 
 echo "Creating launchers..."
@@ -56,6 +63,7 @@ echo "Chowning files to root"
 chown -R root:root "$install_dir"
 chown root:root "/usr/local/bin/discord-updater"
 chown root:root "/usr/local/bin/discord-updater-gui"
+chown -R root:root "$config_dir"
 
 echo "Setting permissions..."
 chmod 755 /usr/local/bin/discord-updater
@@ -64,6 +72,8 @@ chmod -R 755 "$install_dir"
 chmod 755 "$install_dir/run_discord.sh"
 chmod 666 "$install_dir/config.json"
 chmod 666 "$install_dir/last_saved.json"
+chmod -R 755 "$config_dir"
+chmod 666 "$config_dir/config.json"
 
 
 read -p "Installation is complete. Do you want to create a Desktop menu shortcut (GUI)? (y/n): " create_shortcut
