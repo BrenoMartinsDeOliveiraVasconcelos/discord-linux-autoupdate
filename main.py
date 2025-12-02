@@ -4,7 +4,7 @@ from sys import exit
 import traceback
 
 def main(mode: str):
-    modes = ['gui', 'cli']
+    modes = ['gui', 'cli', "gui-no-interrupt"]
     return_code = 0
 
     if mode not in modes:   
@@ -28,17 +28,21 @@ def main(mode: str):
             else:
                 print("Installation failed.")
                 return_code = 1
-    elif mode == 'gui':
+    elif mode.startswith('gui'):
         import gui
+
+        if mode == 'gui-no-interrupt':
+            gui.SHOW_INFO = False
+
         if return_code != 0:
-            gui.show_error("Error", f"Error fetching file due to {error_class}.\n\n{error}\n\nFull traceback:\n{error}")
+            gui.show_error("Error", f"Error fetching file due to {error_class}.")
         elif file:
             gui.show_info("Info", "An update has been downloaded. Installation will begin. Press OK to continue.")
             success = helpers.install_file(file, elevate_cmd='auto')
             if success:
                 gui.show_info("Success", "Installation completed successfully.")
             else:
-                gui.show_error("Error", "Installation failed.")
+                gui.show_error("Error", "Update failed.")
         else:
             gui.show_info("Info", "No updates available.")
 
@@ -52,7 +56,7 @@ if __name__ == '__main__':
         try:
             return_code = main(mode=mode_arg)
         except ValueError:
-            print("Invalid argument. Use 'gui' or 'cli'.")
+            print("Invalid argument. Use 'gui', 'gui-no-interrupt' or 'cli'.")
             exit(1)
         
         exit(return_code)

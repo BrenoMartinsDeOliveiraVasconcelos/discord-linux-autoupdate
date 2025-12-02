@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
+SHOW_INFO = True
 
 def show_info(title: str, message: str) -> None:
     """
@@ -10,6 +11,9 @@ def show_info(title: str, message: str) -> None:
         title (str): The title of the message box.
         message (str): The message to display.
     """
+    if not SHOW_INFO:
+        return
+
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     messagebox.showinfo(title, message)

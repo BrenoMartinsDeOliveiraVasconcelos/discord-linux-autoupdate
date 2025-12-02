@@ -1,5 +1,14 @@
 #!/bin/bash
 
 cd /usr/local/share/discord-linux-autoupdate/
-./venv/bin/python3 main.py gui
+
+arg="gui"
+
+for i in "$@"; do
+    if [[ $i == "--no-interrupt" || $i == "-ni" ]]; then
+        arg="gui-no-interrupt"
+    fi
+done
+
+./venv/bin/python3 main.py $arg
 ./run_discord.sh "$@"
