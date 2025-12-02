@@ -130,20 +130,20 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
     return False
 
 
-def install_file(file_path: str, elevate_cmd: str = 'auto') -> None:
+def install_file(file_path: str, elevate_command: str = 'auto') -> None:
     """
     Installs the downloaded file using the appropriate package manager.
 
     Args:
         file_path (str): Path to the downloaded file.
-        elevate_cmd (str): Command to use for privilege elevation. Options are 'auto', 'sudo', or 'pkexec'. Defaults to 'auto'.
+        elevate_command (str): Command to use for privilege elevation. Options are 'auto', 'sudo', or 'pkexec'. Defaults to 'auto'.
 
     Returns:
         bool: True if installation was successful, False otherwise.
 
     """
     valid_elevate_cmds = ['auto', 'sudo', 'pkexec']
-    if elevate_cmd not in valid_elevate_cmds:
+    if elevate_command not in valid_elevate_cmds:
         raise ValueError(f"Invalid elevate_cmd. Must be one of {valid_elevate_cmds}.")
 
     if not os.path.exists(file_path):
@@ -151,7 +151,7 @@ def install_file(file_path: str, elevate_cmd: str = 'auto') -> None:
 
     pkg_type = file_path.split('.')[-1]
     
-    if elevate_cmd == 'auto':
+    if elevate_command == 'auto':
         if shutil.which('pkexec') is not None:
             elevate_command = 'pkexec'
         else:

@@ -8,7 +8,7 @@ fi
 
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_path"
-install_dir="/usr/local/share/discord-linux-autoupdate"
+install_dir="/usr/local/share/discord-updater"
 
 if command -v apt-get &> /dev/null; then
     echo "Dependency installation for Debian-based distributions has started."
@@ -56,12 +56,13 @@ chown root:root "/usr/local/bin/discord-updater"
 chown root:root "/usr/local/bin/discord-updater-gui"
 
 echo "Setting permissions..."
-chmod a+x /usr/local/bin/discord-updater
-chmod a+x /usr/local/bin/discord-updater-gui
-chmod -R a+rX "$install_dir"
-chmod a+rX "$install_dir/run_discord.sh"
-chmod a+rw "$install_dir/config.json"
-chmod a+rw "$install_dir/last_saved.json"
+chmod 755 /usr/local/bin/discord-updater
+chmod 755 /usr/local/bin/discord-updater-gui
+chmod -R 755 "$install_dir"
+chmod 755 "$install_dir/run_discord.sh"
+chmod 666 "$install_dir/config.json"
+chmod 666 "$install_dir/last_saved.json"
+
 
 read -p "Installation is complete. Do you want to create a Desktop menu shortcut (GUI)? (y/n): " create_shortcut
 if [[ "$create_shortcut" == "y" || "$create_shortcut" == "Y" ]]; then
@@ -70,5 +71,5 @@ if [[ "$create_shortcut" == "y" || "$create_shortcut" == "Y" ]]; then
 
     cp dau.desktop -r $desktop_file_path
     chown root:root $desktop_file_path
-    chmod a+rX $desktop_file_path
+    chmod 755 $desktop_file_path
 fi

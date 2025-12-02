@@ -22,7 +22,7 @@ def main(mode: str):
         if return_code != 0:
             print(f"Error fetching file due to {error_class}.\n\n{error}\n\nFull traceback:\n{error}")
         elif file:
-            success = helpers.install_file(file, elevate_cmd='sudo')
+            success = helpers.install_file(file, elevate_command='sudo')
             if success:
                 print("Installation completed successfully.")
             else:
@@ -38,7 +38,7 @@ def main(mode: str):
             gui.show_error("Error", f"Error fetching file due to {error_class}.")
         elif file:
             gui.show_info("Info", "An update has been downloaded. Installation will begin. Press OK to continue.")
-            success = helpers.install_file(file, elevate_cmd='auto')
+            success = helpers.install_file(file, elevate_command='auto')
             if success:
                 gui.show_info("Success", "Installation completed successfully.")
             else:

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /usr/local/share/discord-linux-autoupdate/
+cd /usr/local/share/discord-updater/
 
 arg="gui"
 
