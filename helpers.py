@@ -4,6 +4,7 @@ import os
 import random
 import hashlib
 import datetime
+import subprocess
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -117,9 +118,49 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
     return False
 
 
+def install_file(file_path: str) -> None:
+    """
+    Installs the downloaded file using the appropriate package manager.
 
+    Args:
+        file_path (str): Path to the downloaded file.
+
+    Returns:
+        bool: True if installation was successful, False otherwise.
+
+    """
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"The file {file_path} does not exist.")
+
+    pkg_type = file_path.split('.')[-1]
+
+    if pkg_type == 'deb':
+        apt_fix = False
+        try:
+            subprocess.check_call(['sudo', 'dpkg', '-i', file_path])
+            print(f"Successfully installed {file_path} using dpkg.")
+            return True   
+        except subprocess.CalledProcessError:
+            apt_fix = True
+        except FileNotFoundError:
+            print("Error: Could not find 'sudo' or 'dpkg'. Are you on a Debian-based system?")
+            return False
+        
+        if apt_fix:
+            try:
+                subprocess.check_call(['sudo', 'apt-get', '-f', 'install'])
+                print(f"Successfully fixed dependencies for {file_path} using apt-get.")
+                return True
+            except subprocess.CalledProcessError:
+                print(f"Failed to fix dependencies for {file_path} using apt-get.")
+                return False
+    else:
+        return False
 
 
 
 if __name__ == '__main__':
-    fetch_file()
+    file = fetch_file()
+    if file:
+        install_file(file)
