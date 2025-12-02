@@ -1,3 +1,4 @@
 #!/bin/bash
 
-python3 /usr/local/share/discord-linux-autoupdate/main.py gui
+cd /usr/local/share/discord-linux-autoupdate/
+./venv/bin/python3 main.py gui

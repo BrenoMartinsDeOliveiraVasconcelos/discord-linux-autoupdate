@@ -13,6 +13,8 @@ if command -v apt-get &> /dev/null; then
     if [[ "$userwantsgui" == "y" || "$userwantsgui" == "Y" ]]; then
         sudo apt-get install -y python3-tk
     fi
+
+    sudo apt-get install -y python3-venv
 else
     echo "This software only supports Debian-based distributions due Discord linux package format."
     exit 1
@@ -44,3 +46,12 @@ sudo chmod a+x /usr/local/bin/discord-updater-gui
 sudo chmod -R a+rX "$install_dir"
 sudo chmod a+rw "$install_dir/config.json"
 sudo chmod a+rw "$install_dir/last_saved.json"
+
+echo "Installing virtual environment and dependencies..."
+cd $install_dir
+python3 -m venv venv
+
+source ./venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+deactivate
