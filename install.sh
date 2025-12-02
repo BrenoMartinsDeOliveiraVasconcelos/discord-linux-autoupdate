@@ -35,6 +35,15 @@ echo "Creating launchers..."
 sudo cp -r cli_run.sh /usr/local/bin/discord-updater
 sudo cp -r gui_run.sh /usr/local/bin/discord-updater-gui
 
+echo "Installing virtual environment and dependencies..."
+cd $install_dir
+sudo python3 -m venv venv
+
+source ./venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+deactivate
+
 echo "Chowning files to root"
 sudo chown -R root:root "$install_dir"
 sudo chown root:root "/usr/local/bin/discord-updater"
@@ -44,14 +53,6 @@ echo "Setting permissions..."
 sudo chmod a+x /usr/local/bin/discord-updater
 sudo chmod a+x /usr/local/bin/discord-updater-gui
 sudo chmod -R a+rX "$install_dir"
+sudo chmod a+rX "$install_dir/run_discord.sh"
 sudo chmod a+rw "$install_dir/config.json"
 sudo chmod a+rw "$install_dir/last_saved.json"
-
-echo "Installing virtual environment and dependencies..."
-cd $install_dir
-python3 -m venv venv
-
-source ./venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-deactivate
