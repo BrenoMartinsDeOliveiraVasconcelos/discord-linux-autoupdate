@@ -1,6 +1,7 @@
 import helpers
 from sys import argv as args
 from sys import exit
+import traceback
 
 def main(mode: str):
     modes = ['gui', 'cli']
@@ -8,11 +9,19 @@ def main(mode: str):
 
     if mode not in modes:   
         raise ValueError(f"Invalid mode. Choose from {modes}.")
-    file = helpers.fetch_file(pkg='deb')
+    error = ""
+    error_class = None
+    try:
+        file = helpers.fetch_file(pkg='deb')
+    except Exception as e:
+        return_code = 1
+        error = traceback.format_exc()
+        error_class = e.__class__.__name__
+    
     if mode == 'cli':   
-        
-
-        if file:
+        if return_code != 0:
+            print(f"Error fetching file due to {error_class}.\n\n{error}\n\nFull traceback:\n{error}")
+        elif file:
             success = helpers.install_file(file, elevate_cmd='sudo')
             if success:
                 print("Installation completed successfully.")
@@ -21,7 +30,9 @@ def main(mode: str):
                 return_code = 1
     elif mode == 'gui':
         import gui
-        if file:
+        if return_code != 0:
+            gui.show_error("Error", f"Error fetching file due to {error_class}.\n\n{error}\n\nFull traceback:\n{error}")
+        elif file:
             gui.show_info("Info", "An update has been downloaded. Installation will begin. Press OK to continue.")
             success = helpers.install_file(file, elevate_cmd='auto')
             if success:

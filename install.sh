@@ -25,7 +25,11 @@ sudo mkdir -p $install_dir
 echo "Copying files..."
 sudo cp -r ./* $install_dir
 
-echo "Creating CLI and GUI launchers..."
+echo "Creating necessary files..."
+sudo touch "$install_dir/last_saved.json"
+echo "{}" | sudo tee "$install_dir/last_saved.json" > /dev/null
+
+echo "Creating launchers..."
 sudo cp -r cli_run.sh /usr/local/bin/discord-updater
 sudo cp -r gui_run.sh /usr/local/bin/discord-updater-gui
 
@@ -34,7 +38,9 @@ sudo chown -R root:root "$install_dir"
 sudo chown root:root "/usr/local/bin/discord-updater"
 sudo chown root:root "/usr/local/bin/discord-updater-gui"
 
-echo "Setting executable permissions..."
+echo "Setting permissions..."
 sudo chmod a+x /usr/local/bin/discord-updater
 sudo chmod a+x /usr/local/bin/discord-updater-gui
-sudo chmod -R a+rwX "$install_dir"
+sudo chmod -R a+rX "$install_dir"
+sudo chmod a+rw "$install_dir/config.json"
+sudo chmod a+rw "$install_dir/last_saved.json"

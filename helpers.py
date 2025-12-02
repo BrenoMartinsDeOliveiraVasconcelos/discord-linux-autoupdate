@@ -6,6 +6,7 @@ import hashlib
 import datetime
 import subprocess
 import shutil
+import time
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,6 +17,8 @@ CONFIG = json.load(open(CONFIG_PATH, 'r'))
 URL = CONFIG['url']
 DOWNLOAD_PATH = CONFIG['download_path']
 LAST_SAVED_FILE = os.path.join(SCRIPT_DIR, 'last_saved.json')
+RETRY_ATTEMPTS = CONFIG.get('retry_attempts', 3)
+RETRY_DELAY = CONFIG.get('retry_delay', 5)
 
 # Ensure download path exists
 if not os.path.exists(DOWNLOAD_PATH):
@@ -49,7 +52,9 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
     md5sum_content = ""
 
     # Check request integrity
-    while True:
+    tries = 0
+    while tries < RETRY_ATTEMPTS:
+        tries += 1
         print("Fetching file...", flush=True)
         response = requests.get(url_req)
         response.raise_for_status()
@@ -63,6 +68,11 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
             break
 
         print("Request integrity failed. Retrying...")
+        time.sleep(RETRY_DELAY)
+    else:
+        raise Exception("Failed to verify request integrity after multiple attempts.")
+    
+    tries = 0
 
     file_name = ""
     while True:
@@ -100,7 +110,8 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
 
         # Write file and check write integrity
 
-        while True:
+        while tries < RETRY_ATTEMPTS:
+            tries += 1
             download_path_file = os.path.join(DOWNLOAD_PATH, file_name)
             with open(os.path.join(download_path_file), 'wb') as f:
                 f.write(content)
@@ -110,6 +121,7 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
                 print("File write integrity verified.")
                 break
             print("File write integrity failed. Retrying...")
+            time.sleep(RETRY_DELAY)
             
 
         return os.path.join(DOWNLOAD_PATH, file_name)

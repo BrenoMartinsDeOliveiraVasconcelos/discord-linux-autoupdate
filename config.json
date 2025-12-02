@@ -1,4 +1,6 @@
 {
     "url": "https://discord.com/api/download/stable?platform=linux&format=",
-    "download_path": "/var/tmp/dau"
+    "download_path": "/var/tmp/dau",
+    "retry_attempts": 3,
+    "retry_delay": 5
 }
