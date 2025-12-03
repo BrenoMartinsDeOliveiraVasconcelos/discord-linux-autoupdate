@@ -103,12 +103,10 @@ Notes: `-rd` maps to `--run-discord`. The GUI wrapper supports `-ni` (`--no-inte
 
 ## **Uninstall**
 
-To remove the installed files and launchers:
+You can run the uninstaller on the repo to delete all files.
 
 ```bash
-sudo rm -rf /usr/local/share/discord-updater
-sudo rm -f /usr/local/bin/discord-updater /usr/local/bin/discord-updater-gui
-sudo rm -rf /opt/discord-updater
+sudo ./uninstall.sh
 ```
 
 ---
