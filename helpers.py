@@ -7,7 +7,9 @@ import datetime
 import subprocess
 import shutil
 import time
+import traceback
 
+CHANNELS = ['stable', 'ptb', 'canary']
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_CONFIG_PATH = os.path.join(SCRIPT_DIR, 'config.json')
@@ -38,18 +40,12 @@ json.dump(CONFIG, open(CONFIG_PATH, 'w+'), indent=4)
 # Config variables
 URL = CONFIG['url']
 DOWNLOAD_PATH = CONFIG['download_path']
-LAST_SAVED_FILE = os.path.join(SCRIPT_DIR, 'last_saved.json')
 RETRY_ATTEMPTS = CONFIG.get('retry_attempts', 3)
 RETRY_DELAY = CONFIG.get('retry_delay', 5)
 
 # Ensure download path exists
 if not os.path.exists(DOWNLOAD_PATH):
     os.makedirs(DOWNLOAD_PATH, exist_ok=True)
-
-# Ensure last saved file exists
-if not os.path.exists(LAST_SAVED_FILE):
-    with open(LAST_SAVED_FILE, 'w') as f:
-        f.write('{}')
 
 def fetch_file(pkg: str = 'deb', channel: str = 'stable') -> str | bool:
     """
@@ -68,6 +64,7 @@ def fetch_file(pkg: str = 'deb', channel: str = 'stable') -> str | bool:
         raise NotImplementedError("Discord API only supports 'deb' packages on Linux at the moment.")
 
     url_req = URL.replace("$", channel) + pkg
+    last_saved_file = os.path.join(SCRIPT_DIR, f'{channel}_last_saved.json')
 
     content = b""
     headers = {}
@@ -98,12 +95,12 @@ def fetch_file(pkg: str = 'deb', channel: str = 'stable') -> str | bool:
 
     file_name = ""
     while True:
-        file_name = f"discord-{random.randint(0, 9999999)}.{pkg}"
+        file_name = f"discord-{channel}-{random.randint(0, 9999999)}.{pkg}"
 
         if not os.path.exists(os.path.join(DOWNLOAD_PATH, file_name)):
             break
 
-    last_saved_json = json.load(open(LAST_SAVED_FILE, 'r'))
+    last_saved_json = json.load(open(last_saved_file, 'r'))
     should_download = False
 
     if last_saved_json == {}:
@@ -127,7 +124,7 @@ def fetch_file(pkg: str = 'deb', channel: str = 'stable') -> str | bool:
         last_saved_json["download_time"] = str(datetime.datetime.now())
         last_saved_json["package_type"] = pkg
 
-        with open(LAST_SAVED_FILE, 'w') as f:
+        with open(last_saved_file, 'w') as f:
             json.dump(last_saved_json, f, indent=4)
 
         # Write file and check write integrity
@@ -208,14 +205,17 @@ def clear_downloads() -> None:
     Clears all downloaded files in the download directory.
     """
 
-    last_saved_json = json.load(open(LAST_SAVED_FILE, 'r'))
-
     for file in os.listdir(DOWNLOAD_PATH):
         file_path = os.path.join(DOWNLOAD_PATH, file)
-        try:
-            if os.path.isfile(file_path) and file != last_saved_json["filename"]:
-                os.remove(file_path)
-                print(f"Deleted file: {file_path}")
-        except Exception as e:
-            print(f"Error deleting file {file_path}: {e}")
-            
+        for channel in CHANNELS:
+            last_saved_file = os.path.join(SCRIPT_DIR, f'{channel}_last_saved.json')
+            last_saved_json = json.load(open(last_saved_file, 'r'))
+            try:
+                if os.path.isfile(file_path) and file != last_saved_json["filename"] and channel in file:
+                    os.remove(file_path)
+                    print(f"Deleted file: {file_path}")
+            except KeyError:
+                continue
+            except Exception as e:
+                print(f"Error deleting file {file_path}:\n {traceback.format_exc()}")
+                

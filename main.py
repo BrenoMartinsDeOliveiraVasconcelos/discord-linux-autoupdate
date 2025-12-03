@@ -12,7 +12,7 @@ def main(mode: str, channel: str = 'stable') -> int:
     error = ""
     error_class = None
     try:
-        file = helpers.fetch_file(pkg='deb')
+        file = helpers.fetch_file(pkg='deb', channel=channel)
     except Exception as e:
         return_code = 1
         error = traceback.format_exc()
@@ -53,7 +53,7 @@ def main(mode: str, channel: str = 'stable') -> int:
 if __name__ == '__main__':
     if len(args) > 1:
         modes = ['gui', 'cli', "gui-no-interrupt"]
-        channels = ['stable', 'ptb', 'canary']
+        channels = helpers.CHANNELS
         mode_arg = ""
         channel_arg = "stable"
 

@@ -36,10 +36,13 @@ echo "Copying files..."
 cp -r ./* $install_dir
 
 echo "Creating necessary files..."
-if [ ! -f "$install_dir/last_saved.json" ]; then
-    touch "$install_dir/last_saved.json"
-    echo "{}" | tee "$install_dir/last_saved.json" > /dev/null
-fi
+channels=("stable" "ptb" "canary")
+for channel in "${channels[@]}"; do
+    if [ ! -f "$install_dir/${channel}_last_saved.json" ]; then
+        touch "$install_dir/${channel}_last_saved.json"
+        echo "{}" | tee "$install_dir/${channel}_last_saved.json" > /dev/null
+    fi
+done
 
 if [ ! -f "$config_dir/config.json" ]; then
     touch "$config_dir/config.json"
@@ -71,7 +74,9 @@ chmod 755 /usr/local/bin/discord-updater-gui
 chmod -R 755 "$install_dir"
 chmod 755 "$install_dir/run_discord.sh"
 chmod 666 "$install_dir/config.json"
-chmod 666 "$install_dir/last_saved.json"
+for channel in "${channels[@]}"; do
+    chmod 666 "$install_dir/${channel}_last_saved.json"
+done
 chmod -R 755 "$config_dir"
 chmod 666 "$config_dir/config.json"
 
