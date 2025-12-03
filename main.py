@@ -3,7 +3,7 @@ from sys import argv as args
 from sys import exit
 import traceback
 
-def main(mode: str):
+def main(mode: str, channel: str = 'stable') -> int:
     modes = ['gui', 'cli', "gui-no-interrupt"]
     return_code = 0
 
@@ -52,9 +52,22 @@ def main(mode: str):
 
 if __name__ == '__main__':
     if len(args) > 1:
-        mode_arg = args[1].lower()
+        modes = ['gui', 'cli', "gui-no-interrupt"]
+        channels = ['stable', 'ptb', 'canary']
+        mode_arg = ""
+        channel_arg = "stable"
+
+        for channel in channels:
+            if channel in args:
+                channel_arg = channel
+                break
+
+        for mode in modes:
+            if mode in args:
+                mode_arg = mode
+                break
         try:
-            return_code = main(mode=mode_arg)
+            return_code = main(mode=mode_arg, channel=channel_arg)
         except ValueError:
             print("Invalid argument. Use 'gui', 'gui-no-interrupt' or 'cli'.")
             exit(1)

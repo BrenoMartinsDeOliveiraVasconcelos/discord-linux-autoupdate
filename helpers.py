@@ -37,8 +37,6 @@ json.dump(CONFIG, open(CONFIG_PATH, 'w+'), indent=4)
 
 # Config variables
 URL = CONFIG['url']
-CHANNEL = CONFIG["channel"]
-URL = URL.replace("$", CHANNEL)
 DOWNLOAD_PATH = CONFIG['download_path']
 LAST_SAVED_FILE = os.path.join(SCRIPT_DIR, 'last_saved.json')
 RETRY_ATTEMPTS = CONFIG.get('retry_attempts', 3)
@@ -53,12 +51,13 @@ if not os.path.exists(LAST_SAVED_FILE):
     with open(LAST_SAVED_FILE, 'w') as f:
         f.write('{}')
 
-def fetch_file(pkg: str = 'deb') -> str | bool:
+def fetch_file(pkg: str = 'deb', channel: str = 'stable') -> str | bool:
     """
     Fetches a file from a remote server based on the package type.
 
     Args:
         pkg (str): The package type, either 'deb' or 'rpm'. Defaults to 'deb'.
+        channel (str): The release channel, either 'stable', 'ptb', or 'canary'. Defaults to 'stable'.
 
     Returns:
         str: Path to the downloaded file.
@@ -68,13 +67,12 @@ def fetch_file(pkg: str = 'deb') -> str | bool:
     if pkg != 'deb':
         raise NotImplementedError("Discord API only supports 'deb' packages on Linux at the moment.")
 
-    url_req = URL + pkg
+    url_req = URL.replace("$", channel) + pkg
 
     content = b""
     headers = {}
     request_md5 = ""
     md5sum_content = ""
-
     # Check request integrity
     tries = 0
     while tries < RETRY_ATTEMPTS:
@@ -220,7 +218,4 @@ def clear_downloads() -> None:
                 print(f"Deleted file: {file_path}")
         except Exception as e:
             print(f"Error deleting file {file_path}: {e}")
-
-
-if __name__ == '__main__':
-    print(CHANNEL, URL)
+            
