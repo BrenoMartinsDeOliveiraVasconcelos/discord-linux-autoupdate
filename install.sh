@@ -83,10 +83,21 @@ chmod 666 "$config_dir/config.json"
 
 read -p "Installation is complete. Do you want to create a Desktop menu shortcut (GUI)? (y/n): " create_shortcut
 if [[ "$create_shortcut" == "y" || "$create_shortcut" == "Y" ]]; then
-    desktop_file_path="/usr/share/applications/dau.desktop"
-    echo "Creating .desktop shortcut at $desktop_file_path"
+    wanted_channels=()
+    for channel in "${channels[@]}"; do
+        read -p "Create an entry for $channel channel? (y/n): " include_channel
+        if [[ "$include_channel" == "y" || "$include_channel" == "Y" ]]; then
+            wanted_channels+=("$channel")
+        fi
+    done
 
-    cp dau.desktop -r $desktop_file_path
-    chown root:root $desktop_file_path
-    chmod 755 $desktop_file_path
+    for channel in "${wanted_channels[@]}"; do
+        desktop_file_path="/usr/share/applications/dau_${channel}.desktop"
+        echo "Creating .desktop file at $desktop_file_path"
+
+        cp desktop/dau_${channel}.desktop -r $desktop_file_path
+        chown root:root $desktop_file_path
+        chmod 755 $desktop_file_path
+    done
 fi
+echo "Installation finished successfully."

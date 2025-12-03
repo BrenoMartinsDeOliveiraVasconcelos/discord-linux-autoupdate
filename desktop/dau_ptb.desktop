@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=Discord PTB Updater
+Comment=Discord auto updater for Debian-based distributions
+Exec=/usr/local/bin/discord-updater-gui -rd -ni ptb
+Icon=/usr/local/share/discord-updater/icon/dau_ptb.png
+Terminal=false
+Type=Application
+Categories=Network;
