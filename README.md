@@ -1,31 +1,30 @@
+
 # discord-linux-autoupdate
 
-A small helper for Debian-based Linux distributions that automatically checks for and installs the latest Discord .deb package when one is available. It supports both command-line and GUI. Currently, it only supports Debian/Ubuntu based systems due Discord only offically packaging on .deb and .tar.gz.
----
-
-## Features
-
-- Automatically fetches the latest Discord Linux (.deb) package
-- Install updates automatically (CLI or GUI flows)
-- Thin, portable Python project that runs inside a virtualenv
-- Optional GUI (requires python3-tk)
+A small helper for Debian-based Linux distributions that automatically checks for and installs the latest Discord `.deb` package when one is available.
 
 ---
 
-## Requirements
+## **Features**
 
-- Debian-based Linux distribution (the project uses apt-based install scripts)
-- Python 3.8+ (system python) and python3-venv
-- pip and the `requests` package (listed in `requirements.txt`)
-- Optional for GUI: `python3-tk`
-
-The project currently targets Debian-style distributions because it expects Discord in .deb format.
+- **Auto-update**: Fetches the latest Discord `.deb` for the selected channel and installs it.
+- **CLI & GUI**: Run headless via CLI or interactively with a basic GUI.
+- **Safe downloads**: Verifies download and write integrity with MD5 checksum.
 
 ---
 
-## Installation (recommended)
+## **Requirements**
 
-The repository includes `install.sh` which performs a one-time installation into `/usr/local/share/discord-linux-autoupdate` and creates launchers in `/usr/local/bin`.
+- **Debian/Ubuntu-based Linux** (due Discord's lack of packaging outside of .deb)
+- **Python 3.8+**, `python3-venv` and `pip`.
+- Python packages listed in `requirements.txt` (installer sets these up automatically).
+- Optional GUI: `python3-tk`.
+
+---
+
+## **Installation (recommended)**
+
+The repository includes `install.sh` which performs a one-time installation into `/usr/local/share/discord-updater` and creates launchers in `/usr/local/bin`. Optionally, it creates menu entries which also opens discord automatically after finishing execution.
 
 Run the installer from the project folder:
 
@@ -33,23 +32,13 @@ Run the installer from the project folder:
 sudo bash ./install.sh
 ```
 
-What `install.sh` does:
-
-- Installs optional GUI dependencies if desired.
-- Creates /usr/local/share/discord-linux-autoupdate and copies project files there
-- Creates a virtual environment and installs `requirements.txt`
-- Adds two launchers to `/usr/local/bin`: `discord-updater` (CLI) and `discord-updater-gui` (GUI), copying the wrapper scripts
-- Ensures file permissions and minimal configuration are set
-
-After the script finishes you can run the CLI or GUI commands explained below.
-
 ---
 
-## Usage
+## **Usage**
 
-You can use the project in two ways: installed system-wide (via install script) or run directly from the repository.
+You can run the project either installed system-wide (recommended) or directly from the repository.
 
-### Installed - system commands
+**Installed — system commands**
 
 - CLI mode (checks & auto-installs):
 
@@ -57,53 +46,69 @@ You can use the project in two ways: installed system-wide (via install script) 
 discord-updater        # runs the CLI updater
 ```
 
-- GUI mode (checks, auto-installs & shows prompts graphically):
+- GUI mode:
 
 ```bash
 discord-updater-gui    # runs the GUI updater
 ```
 
-Both scripts will also attempt to optionally start Discord after updating if passed the `--run-discord` (shortly, `-rd`) argument.
+Both launcher scripts support a channel argument (`stable`, `ptb`, `canary`) and the run-discord flag `--run-discord` (short `-rd`) to start Discord after updating.
 
-### Directly
+**Direct**
 
-If you do not want to run the installer, or you are developing locally, run the Python entrypoint directly from the project directory.
-
-Run the CLI flow:
+From the project root you can run the Python entrypoint directly using the bundled virtualenv or system Python.
 
 ```bash
-python3 main.py cli
+python3 main.py cli                  # CLI flow
+python3 main.py gui                  # GUI flow (shows prompts)
+python3 main.py gui-no-interrupt     # GUI but suppress informational dialogs
 ```
 
-Run the GUI flow (interactive):
+You may also pass a channel name, e.g. `python3 main.py cli canary`.
 
-```bash
-python3 main.py gui
-```
-
-Run the GUI flow but suppress informational dialogs (only show errors):
-
-```bash
-python3 main.py gui-no-interrupt
-```
-
-To auto-start the actual Discord binary after update, pass the `--run-discord` or `-rd` argument to the wrapper scripts (see `cli_run.sh` and `gui_run.sh`).
+Note: Create 3 empty json files that cointains `{}` only on the same folder, which names are: `stable_last_saved.json`, `ptb_last_saved.json` and `canary_last_saved.json`
 
 ---
 
-## Uninstall
+## **Configuration**
 
-Remove the installed directory and launchers:
+The repository includes a default `config.json`. When installed, a copy is used at `/opt/discord-updater/config.json` (the installer creates this file). Key config values:
+
+- `url`: Template URL used to fetch Discord packages. `$` is replaced with the channel name.
+- `download_path`: Directory where downloads are saved (default `/var/tmp/dau`).
+- `retry_attempts`: Number of attempts to retry downloads/writes.
+- `retry_delay`: Delay (seconds) between retry attempts.
+
+Edit the installed config at `/opt/discord-updater/config.json` to change behavior after installing. When running directly from the repo the local `config.json` will be used as a fallback.
+
+---
+
+## **Examples & Flags**
+
+- Run CLI and start Discord after update (stable channel):
 
 ```bash
-sudo rm -rf /usr/local/share/discord-linux-autoupdate
+discord-updater -rd
+```
+
+- Run GUI for the `canary` channel without informational popups:
+
+```bash
+discord-updater-gui canary -ni
+```
+
+Notes: `-rd` maps to `--run-discord`. The GUI wrapper supports `-ni` (`--no-interrupt`) to suppress info dialogs.
+
+---
+
+## **Uninstall**
+
+To remove the installed files and launchers:
+
+```bash
+sudo rm -rf /usr/local/share/discord-updater
 sudo rm -f /usr/local/bin/discord-updater /usr/local/bin/discord-updater-gui
+sudo rm -rf /opt/discord-updater
 ```
-
----
-
-## Contributing
-
-Contributions are welcome. Please open issues for bugs or feature requests and PRs for fixes/improvements.
 
 ---
