@@ -33,7 +33,11 @@ mkdir -p $install_dir
 mkdir -p $config_dir
 
 echo "Copying files..."
-cp -r ./* $install_dir
+files_to_copy=("cli_run.sh" "gui_run.sh" "run_discord.sh" "main.py" "helpers.py" "gui.py" "icon" "config.json" "README.md" "LICENSE.md" "DISCLAIMER.md" "uninstall.sh" "requirements.txt" "desktop")
+
+for file in "${files_to_copy[@]}"; do
+    cp -r "$file" "$install_dir/"
+done
 
 echo "Creating necessary files..."
 channels=("stable" "ptb" "canary")

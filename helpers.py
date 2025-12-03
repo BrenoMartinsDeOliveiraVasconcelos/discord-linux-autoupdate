@@ -38,7 +38,7 @@ for key, value in default_config.items():
 json.dump(CONFIG, open(CONFIG_PATH, 'w+'), indent=4)
 
 # Config variables
-URL = CONFIG['url']
+URL = "https://discord.com/api/download/$?platform=linux&format="
 DOWNLOAD_PATH = CONFIG['download_path']
 RETRY_ATTEMPTS = CONFIG.get('retry_attempts', 3)
 RETRY_DELAY = CONFIG.get('retry_delay', 5)
