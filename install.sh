@@ -104,4 +104,12 @@ if [[ "$create_shortcut" == "y" || "$create_shortcut" == "Y" ]]; then
         chmod 755 $desktop_file_path
     done
 fi
+
 echo "Installation finished successfully."
+
+echo "Removing post install trash."
+
+rm -rf "$install_dir/requirements.txt"
+rm -rf "$install_dir/desktop"
+
+echo "Done."
