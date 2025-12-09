@@ -7,7 +7,9 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$script_path"
+git_path="$script_path/dl"
+mkdir -p "$git_path"
+cd "$git_path"
 install_dir="/usr/local/share/discord-updater"
 config_dir="/opt/discord-updater"
 
@@ -21,12 +23,15 @@ if command -v apt-get &> /dev/null; then
         apt-get install -y python3-tk
     fi
 
-    apt-get install -y python3-venv
+    apt-get install -y python3-venv git wget
+    echo "Dependencies installed."
 else
     echo "This software only supports Debian-based distributions due Discord linux package format."
     exit 1
 fi
 
+# Clone the repository
+git clone https://github.com/BrenoMartinsDeOliveiraVasconcelos/discord-linux-autoupdate.git .   
 
 echo "Creating necessary directories..."
 mkdir -p $install_dir
@@ -111,5 +116,7 @@ echo "Removing post install trash."
 
 rm -rf "$install_dir/requirements.txt"
 rm -rf "$install_dir/desktop"
+cd "$script_path"
+rm -rf "$git_path"
 
 echo "Done."
