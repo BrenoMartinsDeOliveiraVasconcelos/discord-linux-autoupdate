@@ -41,7 +41,7 @@ echo "Copying files..."
 files_to_copy=("cli_run.sh" "gui_run.sh" "run_discord.sh" "main.py" "helpers.py" "gui.py" "icon" "config.json" "README.md" "LICENSE.md" "DISCLAIMER.md" "uninstall.sh" "requirements.txt" "desktop")
 
 for file in "${files_to_copy[@]}"; do
-    cp -r "$file" "$install_dir/"
+    cp -f -r "$file" "$install_dir/"
 done
 
 echo "Creating necessary files..."
@@ -59,8 +59,8 @@ if [ ! -f "$config_dir/config.json" ]; then
 fi
 
 echo "Creating launchers..."
-cp -r cli_run.sh /usr/local/bin/discord-updater
-cp -r gui_run.sh /usr/local/bin/discord-updater-gui
+cp -f -r cli_run.sh /usr/local/bin/discord-updater
+cp -f -r gui_run.sh /usr/local/bin/discord-updater-gui
 
 echo "Installing virtual environment and dependencies..."
 cd $install_dir
@@ -104,15 +104,13 @@ if [[ "$create_shortcut" == "y" || "$create_shortcut" == "Y" ]]; then
         desktop_file_path="/usr/share/applications/dau_${channel}.desktop"
         echo "Creating .desktop file at $desktop_file_path"
 
-        cp desktop/dau_${channel}.desktop -r $desktop_file_path
+        cp -f desktop/dau_${channel}.desktop -r $desktop_file_path
         chown root:root $desktop_file_path
         chmod 755 $desktop_file_path
     done
 fi
 
-
-echo "Do you want to kidnap Discord's .desktop file to run the updater? (y/n):"
-read kidnap_discord
+read -p "Do you want to kidnap Discord's .desktop file to run the updater? (y/n):"  kidnap_discord
 if [[ "$kidnap_discord" == "y" || "$kidnap_discord" == "Y" ]]; then
     touch "$install_dir/kidnap"
 fi

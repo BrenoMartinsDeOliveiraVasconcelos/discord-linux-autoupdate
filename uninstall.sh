@@ -24,4 +24,17 @@ for dir in "${desktop_dirs[@]}"; do
     fi
 done
 
+
+# Replace discord.desktop with the original one if it exists
+for dir in "${desktop_dirs[@]}"; do
+    pattern='discord*.desktop'
+    if [ -d "$dir" ]; then
+        for file in "$dir"/$pattern; do
+            if [ -f "$file.original" ]; then
+                mv "$file.original" "$file"
+            fi
+        done
+    fi
+done
+
 echo "Discord Updater has been uninstalled."

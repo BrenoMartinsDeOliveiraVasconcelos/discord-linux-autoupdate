@@ -48,7 +48,16 @@ def main(mode: str, channel: str = 'stable') -> int:
         else:
             gui.show_info("Info", "No updates available.")
 
-    helpers.replace_discord_desktop(elevate_command=elevate_command)
+    try:
+        helpers.replace_discord_desktop(elevate_command=elevate_command)
+    except Exception as e:
+        return_code = 1
+
+        if mode == 'cli':
+            print(f"Error replacing desktop entry due to {e.__class__.__name__}.\n\n{traceback.format_exc()}")
+        elif mode.startswith('gui'):
+            gui.show_error("Error", f"Error replacing desktop entry due to {e.__class__.__name__}.")
+            
     helpers.clear_downloads()
     return return_code
 

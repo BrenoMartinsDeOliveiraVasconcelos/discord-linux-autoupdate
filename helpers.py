@@ -227,7 +227,7 @@ def clear_downloads() -> None:
                 print(f"Error deleting file {file_path}:\n {traceback.format_exc()}")
 
 
-def replace_discord_desktop(elevate_command: str) -> None:
+def replace_discord_desktop(elevate_command: str) -> bool:
     """
     Replaces the Discord desktop entry with the one from the updater.
     """
@@ -238,31 +238,35 @@ def replace_discord_desktop(elevate_command: str) -> None:
             if channel == "stable":
                 discord_desktop = "discord.desktop"
 
+            elevate_command = get_elevate_cmd(elevate_command)
             desktop_file_path = os.path.join(DESKTOP_DIR, discord_desktop)
             if os.path.exists(desktop_file_path):
                 print(f"Updating {desktop_file_path}")
                 content = open(desktop_file_path, 'r').readlines()
                 for line in content:
-                    if line.startswith("Exec="):
+                    if line.startswith("Exec=") and EXEC_PATH not in line:
                         exec_path_w_args = EXEC_PATH + " " + " ".join(DESKTOP_DOT_ARGS) + " " + channel
                         new_line = f"Exec={exec_path_w_args}\n"
                         print(new_line)
                         content[content.index(line)] = new_line
 
-                elevate_command = get_elevate_cmd(elevate_command)
+                        # Create a copy of the original file
+                        subprocess.check_call([elevate_command, 'cp', desktop_file_path, desktop_file_path + '.original'])  
 
-                new_content = "".join(content)
-                try:
-                    p = subprocess.Popen(
-                        [elevate_command, 'tee', desktop_file_path], 
-                        stdin=subprocess.PIPE, 
-                        stdout=subprocess.DEVNULL
-                    )
-                    p.communicate(input=new_content.encode('utf-8'))
-                    
-                    if p.returncode == 0:
-                        print(f"Successfully wrote to {desktop_file_path}")
+                        new_content = "".join(content)
+                        try:
+                            p = subprocess.Popen(
+                                [elevate_command, 'tee', desktop_file_path], 
+                                stdin=subprocess.PIPE, 
+                                stdout=subprocess.DEVNULL
+                            )
+                            p.communicate(input=new_content.encode('utf-8'))
+                            
+                            if p.returncode == 0:
+                                return True
+                            else:
+                                raise subprocess.CalledProcessError(p.returncode, p.args)
+                        except Exception as e:
+                            raise e
                     else:
-                        print(f"Failed to write to {desktop_file_path}")
-                except Exception as e:
-                    print(f"Error executing update command: {e}")
+                        raise FileNotFoundError(f"Could not find {desktop_file_path}")
