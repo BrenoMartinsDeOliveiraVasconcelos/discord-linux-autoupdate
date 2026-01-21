@@ -12,9 +12,13 @@ import traceback
 CHANNELS = ['stable', 'ptb', 'canary']
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+print(SCRIPT_DIR)
 DEFAULT_CONFIG_PATH = os.path.join(SCRIPT_DIR, 'config.json')
 CONFIG_DIR = "/opt/discord-updater"
 CONFIG_PATH = f"{CONFIG_DIR}/config.json"
+DESKTOP_DIR = "/usr/share/applications"
+DESKTOP_DOT_ARGS = ['-rd', "-ni"]
+EXEC_PATH = "/usr/local/bin/discord-updater-gui"
 
 # Load user config if it exists, otherwise create it with default values
 CONFIG = json.load(open(CONFIG_PATH, 'r'))
@@ -149,6 +153,21 @@ def fetch_file(pkg: str = 'deb', channel: str = 'stable') -> str | bool:
     return False
 
 
+def get_elevate_cmd(elevate_command: str = 'auto') -> str:
+    valid_elevate_cmds = ['auto', 'sudo', 'pkexec']
+    if elevate_command not in valid_elevate_cmds:
+        raise ValueError(f"Invalid elevate_cmd. Must be one of {valid_elevate_cmds}.")
+
+    
+    if elevate_command == 'auto':
+        if shutil.which('pkexec') is not None:
+            elevate_command = 'pkexec'
+        else:
+            elevate_command = 'sudo'
+
+    return elevate_command
+
+
 def install_file(file_path: str, elevate_command: str = 'auto') -> None:
     """
     Installs the downloaded file using the appropriate package manager.
@@ -161,20 +180,8 @@ def install_file(file_path: str, elevate_command: str = 'auto') -> None:
         bool: True if installation was successful, False otherwise.
 
     """
-    valid_elevate_cmds = ['auto', 'sudo', 'pkexec']
-    if elevate_command not in valid_elevate_cmds:
-        raise ValueError(f"Invalid elevate_cmd. Must be one of {valid_elevate_cmds}.")
-
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"The file {file_path} does not exist.")
-
     pkg_type = file_path.split('.')[-1]
-    
-    if elevate_command == 'auto':
-        if shutil.which('pkexec') is not None:
-            elevate_command = 'pkexec'
-        else:
-            elevate_command = 'sudo'
+    elevate_command = get_elevate_cmd(elevate_command)
 
     if pkg_type == 'deb':
         apt_fix = False
@@ -218,4 +225,44 @@ def clear_downloads() -> None:
                 continue
             except Exception as e:
                 print(f"Error deleting file {file_path}:\n {traceback.format_exc()}")
-                
+
+
+def replace_discord_desktop(elevate_command: str) -> None:
+    """
+    Replaces the Discord desktop entry with the one from the updater.
+    """
+    if "kidnap" in os.listdir(SCRIPT_DIR):
+        for channel in CHANNELS:
+            discord_desktop = f"discord-{channel}.desktop"
+
+            if channel == "stable":
+                discord_desktop = "discord.desktop"
+
+            desktop_file_path = os.path.join(DESKTOP_DIR, discord_desktop)
+            if os.path.exists(desktop_file_path):
+                print(f"Updating {desktop_file_path}")
+                content = open(desktop_file_path, 'r').readlines()
+                for line in content:
+                    if line.startswith("Exec="):
+                        exec_path_w_args = EXEC_PATH + " " + " ".join(DESKTOP_DOT_ARGS) + " " + channel
+                        new_line = f"Exec={exec_path_w_args}\n"
+                        print(new_line)
+                        content[content.index(line)] = new_line
+
+                elevate_command = get_elevate_cmd(elevate_command)
+
+                new_content = "".join(content)
+                try:
+                    p = subprocess.Popen(
+                        [elevate_command, 'tee', desktop_file_path], 
+                        stdin=subprocess.PIPE, 
+                        stdout=subprocess.DEVNULL
+                    )
+                    p.communicate(input=new_content.encode('utf-8'))
+                    
+                    if p.returncode == 0:
+                        print(f"Successfully wrote to {desktop_file_path}")
+                    else:
+                        print(f"Failed to write to {desktop_file_path}")
+                except Exception as e:
+                    print(f"Error executing update command: {e}")

@@ -110,6 +110,13 @@ if [[ "$create_shortcut" == "y" || "$create_shortcut" == "Y" ]]; then
     done
 fi
 
+
+echo "Do you want to kidnap Discord's .desktop file to run the updater? (y/n):"
+read kidnap_discord
+if [[ "$kidnap_discord" == "y" || "$kidnap_discord" == "Y" ]]; then
+    touch "$install_dir/kidnap"
+fi
+
 echo "Installation finished successfully."
 
 echo "Removing post install trash."

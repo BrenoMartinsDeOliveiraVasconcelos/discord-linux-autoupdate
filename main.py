@@ -11,6 +11,7 @@ def main(mode: str, channel: str = 'stable') -> int:
         raise ValueError(f"Invalid mode. Choose from {modes}.")
     error = ""
     error_class = None
+    elevate_command = 'auto'
     try:
         file = helpers.fetch_file(pkg='deb', channel=channel)
     except Exception as e:
@@ -22,7 +23,8 @@ def main(mode: str, channel: str = 'stable') -> int:
         if return_code != 0:
             print(f"Error fetching file due to {error_class}.\n\n{error}\n\nFull traceback:\n{error}")
         elif file:
-            success = helpers.install_file(file, elevate_command='sudo')
+            elevate_command = 'sudo'
+            success = helpers.install_file(file, elevate_command=elevate_command)
             if success:
                 print("Installation completed successfully.")
             else:
@@ -38,7 +40,7 @@ def main(mode: str, channel: str = 'stable') -> int:
             gui.show_error("Error", f"Error fetching file due to {error_class}.")
         elif file:
             gui.show_info("Info", "An update has been downloaded. Installation will begin. Press OK to continue.")
-            success = helpers.install_file(file, elevate_command='auto')
+            success = helpers.install_file(file, elevate_command=elevate_command)
             if success:
                 gui.show_info("Success", "Installation completed successfully.")
             else:
@@ -46,6 +48,7 @@ def main(mode: str, channel: str = 'stable') -> int:
         else:
             gui.show_info("Info", "No updates available.")
 
+    helpers.replace_discord_desktop(elevate_command=elevate_command)
     helpers.clear_downloads()
     return return_code
 
