@@ -268,5 +268,5 @@ def replace_discord_desktop(elevate_command: str) -> bool:
                                 raise subprocess.CalledProcessError(p.returncode, p.args)
                         except Exception as e:
                             raise e
-                    else:
-                        raise FileNotFoundError(f"Could not find {desktop_file_path}")
+            else:
+                raise FileNotFoundError(f"Could not find {desktop_file_path}")
