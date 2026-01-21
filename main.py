@@ -57,7 +57,7 @@ def main(mode: str, channel: str = 'stable') -> int:
             print(f"Error replacing desktop entry due to {e.__class__.__name__}.\n\n{traceback.format_exc()}")
         elif mode.startswith('gui'):
             gui.show_error("Error", f"Error replacing desktop entry due to {e.__class__.__name__}.")
-            
+
     helpers.clear_downloads()
     return return_code
 
@@ -88,3 +88,4 @@ if __name__ == '__main__':
     else:
         print("Please provide a mode argument: 'gui' or 'cli'.")
         exit(1)
+        

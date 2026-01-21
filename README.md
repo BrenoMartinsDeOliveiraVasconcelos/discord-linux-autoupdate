@@ -40,7 +40,7 @@ You can run the project either installed system-wide (recommended) or directly f
 
 **Installed — system commands**
 
-- CLI mode (checks & auto-installs):
+- CLI mode:
 
 ```bash
 discord-updater        # runs the CLI updater
