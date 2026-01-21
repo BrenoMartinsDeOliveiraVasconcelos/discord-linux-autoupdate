@@ -128,7 +128,7 @@ read -p "Enter your choice (1/2/3): " post_install_choice
 
 selected_channel="stable"
 channels=("stable" "ptb" "canary")
-if [[post_install_choice != 3]]; then
+if [[ "$post_install_choice" != 3 ]]; then
     read -p "Channel (stable/ptb/canary) [default: stable]: " selected_channel
 
     is_present=0
