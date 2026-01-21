@@ -16,14 +16,8 @@ config_dir="/opt/discord-updater"
 if command -v apt-get &> /dev/null; then
     echo "Dependency installation for Debian-based distributions has started."
     apt-get update
-    userwantsgui='n'
-    read -p "[OPTIONAL] Do you want to install the GUI dependencies? (y/n): " userwantsgui
+    apt-get install -y python3-venv git wget python3-tk
 
-    if [[ "$userwantsgui" == "y" || "$userwantsgui" == "Y" ]]; then
-        apt-get install -y python3-tk
-    fi
-
-    apt-get install -y python3-venv git wget
     echo "Dependencies installed."
 else
     echo "This software only supports Debian-based distributions due Discord linux package format."
@@ -125,3 +119,35 @@ cd "$script_path"
 rm -rf "$git_path"
 
 echo "Done."
+
+echo "Select one of these to do after installation:"
+echo "1 - Run Discord Updater GUI"
+echo "2 - Run Discord Updater CLI"
+echo "3 - Exit"
+read -p "Enter your choice (1/2/3): " post_install_choice
+
+selected_channel="stable"
+channels=("stable" "ptb" "canary")
+if [[post_install_choice != 3]]; then
+    read -p "Channel (stable/ptb/canary) [default: stable]: " selected_channel
+
+    is_present=0
+    for channel in "${channels[@]}"; do
+        if [[ "$selected_channel" == "$channel" ]]; then
+            is_present=1
+            break
+        fi
+    done
+
+    if [[ is_present == 0 ]]; then
+        selected_channel="stable"
+    fi
+fi
+
+if [[ "$post_install_choice" == "1" ]]; then
+    discord-updater-gui -rd "$selected_channel"
+elif [[ "$post_install_choice" == "2" ]]; then
+    discord-updater -rd "$selected_channel"
+else
+    echo "Exiting."
+fi
