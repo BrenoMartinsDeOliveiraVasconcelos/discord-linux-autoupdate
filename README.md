@@ -16,7 +16,7 @@ A small helper for Debian-based Linux distributions that automatically checks fo
 ## **Requirements**
 
 - **Debian/Ubuntu-based Linux** (due Discord's lack of packaging outside of .deb)
-- **Python 3.8+**, `python3-venv` and `pip`.
+- **Python 3.10+**, `python3-venv` and `pip`.
 - Python packages listed in `requirements.txt` (installer sets these up automatically).
 - Optional GUI: `python3-tk`.
 
