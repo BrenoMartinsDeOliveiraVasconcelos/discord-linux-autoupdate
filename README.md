@@ -9,7 +9,7 @@ A small helper for Debian-based Linux distributions that automatically checks fo
 
 - **Auto-update**: Fetches the latest Discord `.deb` for the selected channel and installs it.
 - **CLI & GUI**: Run headless via CLI or interactively with a basic GUI.
-- **Safe downloads**: Verifies download and write integrity with MD5 checksum.
+- **Safe downloads**: Verifies download and write integrity against the server’s MD5 ETag.
 
 ---
 
@@ -66,7 +66,7 @@ python3 main.py gui-no-interrupt     # GUI but suppress informational dialogs
 
 You may also pass a channel name, e.g. `python3 main.py cli canary`.
 
-Note: Create 3 empty json files that cointains `{}` only on the same folder, which names are: `stable_last_saved.json`, `ptb_last_saved.json` and `canary_last_saved.json`
+Installation state is created automatically per user under `$XDG_STATE_HOME/discord-updater` (default: `~/.local/state/discord-updater`). A version is recorded only after installation succeeds.
 
 ---
 
@@ -74,9 +74,9 @@ Note: Create 3 empty json files that cointains `{}` only on the same folder, whi
 
 The repository includes a default `config.json`. When installed, a copy is used at `/opt/discord-updater/config.json` (the installer creates this file). Key config values:
 
-- `url`: Template URL used to fetch Discord packages. `$` is replaced with the channel name.
+- `url`: Template URL used to fetch Discord packages. `$` is replaced with the channel name and `deb` is appended.
 - `download_path`: Directory where downloads are saved (default `/var/tmp/dau`).
-- `retry_attempts`: Number of attempts to retry downloads/writes.
+- `retry_attempts`: Total number of download/write attempts (at least 1).
 - `retry_delay`: Delay (seconds) between retry attempts.
 
 Edit the installed config at `/opt/discord-updater/config.json` to change behavior after installing. When running directly from the repo the local `config.json` will be used as a fallback.

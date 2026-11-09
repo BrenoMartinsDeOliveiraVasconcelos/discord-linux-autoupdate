@@ -1,5 +1,6 @@
 {
     "download_path": "/var/tmp/dau",
     "retry_attempts": 3,
-    "retry_delay": 5
+    "retry_delay": 5,
+    "url": "https://discord.com/api/download/$?platform=linux&format="
 }

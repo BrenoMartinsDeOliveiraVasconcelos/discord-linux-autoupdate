@@ -16,8 +16,10 @@ def show_info(title: str, message: str) -> None:
 
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    messagebox.showinfo(title, message)
-    root.destroy()
+    try:
+        messagebox.showinfo(title, message)
+    finally:
+        root.destroy()
 
 
 def show_error(title: str, message: str) -> None:
@@ -30,5 +32,7 @@ def show_error(title: str, message: str) -> None:
     """
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    messagebox.showerror(title, message)
-    root.destroy()
+    try:
+        messagebox.showerror(title, message)
+    finally:
+        root.destroy()

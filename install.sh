@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# CHeck if running as root
+set -euo pipefail
+
+# Check if running as root
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root"
    exit 1
 fi
 
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-git_path="$script_path/dl"
-mkdir -p "$git_path"
-cd "$git_path"
+cd "$script_path"
 install_dir="/usr/local/share/discord-updater"
 config_dir="/opt/discord-updater"
 
@@ -23,9 +23,6 @@ else
     echo "This software only supports Debian-based distributions due Discord linux package format."
     exit 1
 fi
-
-# Clone the repository
-git clone https://github.com/BrenoMartinsDeOliveiraVasconcelos/discord-linux-autoupdate.git .   
 
 echo "Creating necessary directories..."
 mkdir -p $install_dir
@@ -49,7 +46,7 @@ done
 
 if [ ! -f "$config_dir/config.json" ]; then
     touch "$config_dir/config.json"
-    echo "{}" | tee "$config_dir/config.json" > /dev/null
+    cp "$script_path/config.json" "$config_dir/config.json"
 fi
 
 echo "Creating launchers..."
@@ -116,7 +113,7 @@ echo "Removing post install trash."
 rm -rf "$install_dir/requirements.txt"
 rm -rf "$install_dir/desktop"
 cd "$script_path"
-rm -rf "$git_path"
+
 
 echo "Done."
 
@@ -145,9 +142,17 @@ if [[ "$post_install_choice" != 3 ]]; then
 fi
 
 if [[ "$post_install_choice" == "1" ]]; then
-    discord-updater-gui -rd "$selected_channel"
+    if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != root ]]; then
+        sudo -H -u "$SUDO_USER" discord-updater-gui -rd "$selected_channel"
+    else
+        discord-updater-gui "$selected_channel"
+    fi
 elif [[ "$post_install_choice" == "2" ]]; then
-    discord-updater -rd "$selected_channel"
+    if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != root ]]; then
+        sudo -H -u "$SUDO_USER" discord-updater -rd "$selected_channel"
+    else
+        discord-updater "$selected_channel"
+    fi
 else
     echo "Exiting."
 fi

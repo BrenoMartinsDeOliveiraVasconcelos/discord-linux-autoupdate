@@ -1,6 +1,10 @@
 #!/bin/bash
 
-cd /usr/local/share/discord-updater/
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -f "$script_dir/main.py" ]]; then
+    script_dir=/usr/local/share/discord-updater
+fi
+cd "$script_dir" || exit 1
 
 mode="gui"
 
@@ -21,5 +25,5 @@ for i in "$@"; do
     fi
 done
 
-./venv/bin/python3 main.py $mode $channel
+./venv/bin/python3 main.py "$mode" "$channel" || exit $?
 ./run_discord.sh "$@"

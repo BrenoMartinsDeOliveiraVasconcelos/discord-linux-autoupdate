@@ -11,6 +11,10 @@ for arg in "$@"; do
     done
 done
 
-cd /usr/local/share/discord-updater/
-./venv/bin/python3 main.py cli $channel
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -f "$script_dir/main.py" ]]; then
+    script_dir=/usr/local/share/discord-updater
+fi
+cd "$script_dir" || exit 1
+./venv/bin/python3 main.py cli "$channel" || exit $?
 ./run_discord.sh "$@"
